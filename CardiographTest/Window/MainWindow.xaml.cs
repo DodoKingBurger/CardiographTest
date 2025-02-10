@@ -36,7 +36,7 @@ namespace CardiographTest
     {
 
     }
-
+     
     #endregion
 
     #region Консутроры 
