@@ -16,6 +16,7 @@ namespace CardiographTest.Services.Controller
   {
     #region Поля и свойства 
 
+    private bool monitorRead { get; set; } = false;
     private SerialPort port;
 
     /// <summary>
@@ -38,10 +39,11 @@ namespace CardiographTest.Services.Controller
 
     #region Методы работы с пакетами данных
 
+    #region Получение измерений в реальном времени (0x5A)
+
     /// <summary>
-    /// Прослушивание порта после перданной команды.
+    /// Получение измерений в реальном времени(0x5A).
     /// </summary>
-    /// <param name="cmd_code"></param>
     public async void USB_Monitor_Data()
     {
       if (this.Port.IsOpen)
@@ -49,11 +51,10 @@ namespace CardiographTest.Services.Controller
         await Task.Run(() =>
         {
           int byte1 = -1;
-          byte crc = 0;
           UInt16 byte_i = 1;
           byte processing = 0;
-          byte byte_stuffing = 0;
           UInt16 Packet_size = 0;
+          byte crc = 0;
           /* Добавить условия для проверки
           на отправку команды о прекращении
           стрима данных */
@@ -65,37 +66,25 @@ namespace CardiographTest.Services.Controller
               byte1 = this.Port.ReadByte();
               if (byte1 == 240)
               {
-                byte_stuffing = 0;
                 byte_i = 0;
-                crc = 0;
                 processing = 1;
                 Packet_size = 0;
+                crc = 0;
               }
             }
             else
             {
               if (processing == 1)
               {
-                if (byte1 == 0x1b)
+                processing = 0;
+                if(byte_i == 23)
                 {
-                  byte_stuffing = 1;
+                  Packet_size = byte_i;
+                  Read_DATA_STREAM();
                 }
                 else
                 {
-                  processing = 0;
-                  if (crc == 0)
-                  {
-                    Packet_size = byte_i;
-                    USB_monitor();
-                  }
-
-                  if (byte_stuffing == 1)
-                  {
-                    byte1 ^= 0x21;
-                    byte_stuffing = 0;
-                  }
                   Parametr.buffer[byte_i] = Convert.ToByte(byte1);
-                  crc ^= Convert.ToByte(byte1);
                   byte_i++;
                   if (byte_i >= Parametr.USB_RX_DATA_LEN_MAX)
                   {
@@ -105,13 +94,21 @@ namespace CardiographTest.Services.Controller
               }
             }
           }
-
-          }
         });
       }
       else
         throw new IOException("Порт закрыт.");
     }
+
+    /// <summary>
+    /// Разбор пакета полученных данных
+    /// </summary>
+    public void Read_DATA_STREAM()
+    {
+
+    }
+
+    #endregion
 
     /// <summary>
     /// Отправка команды SerialPort.
