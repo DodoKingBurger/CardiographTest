@@ -42,15 +42,70 @@ namespace CardiographTest.Services.Controller
     /// Прослушивание порта после перданной команды.
     /// </summary>
     /// <param name="cmd_code"></param>
-    public async void USB_Monitor(byte cmd_code)
+    public async void USB_Monitor_Data()
     {
       if (this.Port.IsOpen)
       {
         await Task.Run(() =>
         {
-          while (this.Port.IsOpen) 
+          int byte1 = -1;
+          byte crc = 0;
+          UInt16 byte_i = 1;
+          byte processing = 0;
+          byte byte_stuffing = 0;
+          UInt16 Packet_size = 0;
+          /* Добавить условия для проверки
+          на отправку команды о прекращении
+          стрима данных */
+          while (this.Port.IsOpen)
           {
-            if()
+            byte1 = this.Port.ReadByte();
+            if(byte1 == 240)
+            {
+              byte1 = this.Port.ReadByte();
+              if (byte1 == 240)
+              {
+                byte_stuffing = 0;
+                byte_i = 0;
+                crc = 0;
+                processing = 1;
+                Packet_size = 0;
+              }
+            }
+            else
+            {
+              if (processing == 1)
+              {
+                if (byte1 == 0x1b)
+                {
+                  byte_stuffing = 1;
+                }
+                else
+                {
+                  processing = 0;
+                  if (crc == 0)
+                  {
+                    Packet_size = byte_i;
+                    USB_monitor();
+                  }
+
+                  if (byte_stuffing == 1)
+                  {
+                    byte1 ^= 0x21;
+                    byte_stuffing = 0;
+                  }
+                  Parametr.buffer[byte_i] = Convert.ToByte(byte1);
+                  crc ^= Convert.ToByte(byte1);
+                  byte_i++;
+                  if (byte_i >= Parametr.USB_RX_DATA_LEN_MAX)
+                  {
+                    processing = 0;
+                  }
+                }
+              }
+            }
+          }
+
           }
         });
       }
