@@ -39,23 +39,20 @@ namespace CardiographTest.Services.Controller
     /// <summary>
     /// Отправка команды SerialPort.
     /// </summary>
-    /// <param name="cmd_block_code">Код блока команд.</param>
     /// <param name="cmd_code">Код команды.</param>
     /// <param name="rw_flag">1.</param>
     /// <param name="parameter_val">1.</param>
     /// <param name="parametr_size">1.</param>
     /// <exception cref="IOException">Плата не отвечает.</exception>
-    public void USB_TX_short_Msg(byte cmd_block_code, byte cmd_code, byte rw_flag, ref byte parameter_val, int parametr_size)
+    public void USB_TX_short_Msg(byte cmd_code, ref byte parameter_val, int parametr_size)
     {
       byte cnt;
       short i_byte = 1;
       byte CRC_val = 0;
       byte byte_buf;
-      //string bytesWritten;
+
       Parametr.usb_tx_cmd_packet[0] = Convert.ToByte(Parametr.USB_BYTE_START);
-      USB_Paket_Constructor(ref i_byte, ref CRC_val, (byte)cmd_block_code);
       USB_Paket_Constructor(ref i_byte, ref CRC_val, (byte)cmd_code);
-      USB_Paket_Constructor(ref i_byte, ref CRC_val, (byte)rw_flag);
 
       for (cnt = 0; cnt < parametr_size; cnt++)
       {
@@ -79,7 +76,7 @@ namespace CardiographTest.Services.Controller
     }
 
     /// <summary>
-    /// Формерования пакета данных для платы.
+    /// Формерования пакета данных для передачи на плату.
     /// </summary>
     /// <param name="i_byte">Какой байт по счетчику.</param>
     /// <param name="CRC_val">CRC value.</param>
