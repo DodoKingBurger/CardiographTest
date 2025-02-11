@@ -11,5 +11,6 @@ namespace CardiographTest.Controller
   /// </summary>
   internal class MECG
   {
+
   }
 }
