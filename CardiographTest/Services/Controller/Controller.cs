@@ -36,6 +36,28 @@ namespace CardiographTest.Services.Controller
 
     #region Методы
 
+    #region Методы работы с пакетами данных
+
+    /// <summary>
+    /// Прослушивание порта после перданной команды.
+    /// </summary>
+    /// <param name="cmd_code"></param>
+    public async void USB_Monitor(byte cmd_code)
+    {
+      if (this.Port.IsOpen)
+      {
+        await Task.Run(() =>
+        {
+          while (this.Port.IsOpen) 
+          {
+            if()
+          }
+        });
+      }
+      else
+        throw new IOException("Порт закрыт.");
+    }
+
     /// <summary>
     /// Отправка команды SerialPort.
     /// </summary>
@@ -44,7 +66,7 @@ namespace CardiographTest.Services.Controller
     /// <param name="parameter_val">1.</param>
     /// <param name="parametr_size">1.</param>
     /// <exception cref="IOException">Плата не отвечает.</exception>
-    public void USB_TX_short_Msg(byte cmd_code, ref byte parameter_val, int parametr_size)
+    public void USB_TX_short_Msg(byte cmd_code, byte rw_flag, ref byte parameter_val, int parametr_size)
     {
       byte cnt;
       short i_byte = 1;
@@ -53,6 +75,7 @@ namespace CardiographTest.Services.Controller
 
       Parametr.usb_tx_cmd_packet[0] = Convert.ToByte(Parametr.USB_BYTE_START);
       USB_Paket_Constructor(ref i_byte, ref CRC_val, (byte)cmd_code);
+      USB_Paket_Constructor(ref i_byte, ref CRC_val, (byte)rw_flag);
 
       for (cnt = 0; cnt < parametr_size; cnt++)
       {
@@ -93,6 +116,8 @@ namespace CardiographTest.Services.Controller
       Parametr.usb_tx_cmd_packet[i_byte] = data_byte;
       i_byte++;
     }
+
+    #endregion
 
     #region Методы подключения и отключения
 
