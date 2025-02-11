@@ -118,30 +118,32 @@ namespace CardiographTest.Services.Controller
     /// <param name="parameter_val">1.</param>
     /// <param name="parametr_size">1.</param>
     /// <exception cref="IOException">Плата не отвечает.</exception>
-    public void USB_TX_short_Msg(byte cmd_code, byte rw_flag, ref byte parameter_val, int parametr_size)
+    public void USB_TX_short_Msg(byte cmd_code)
     {
-      byte cnt;
-      short i_byte = 1;
-      byte CRC_val = 0;
-      byte byte_buf;
+          //public void USB_TX_short_Msg(byte cmd_code, byte rw_flag, ref byte parameter_val, int parametr_size)
+      //byte cnt;
+      //short i_byte = 1;
+      //byte CRC_val = 0;
+      //byte byte_buf;
 
-      Parametr.usb_tx_cmd_packet[0] = Convert.ToByte(Parametr.USB_BYTE_START);
-      USB_Paket_Constructor(ref i_byte, ref CRC_val, (byte)cmd_code);
-      USB_Paket_Constructor(ref i_byte, ref CRC_val, (byte)rw_flag);
+      //Parametr.usb_tx_cmd_packet[0] = Convert.ToByte(Parametr.USB_BYTE_START);
+      //USB_Paket_Constructor(ref i_byte, ref CRC_val, (byte)cmd_code);
+      //USB_Paket_Constructor(ref i_byte, ref CRC_val, (byte)rw_flag);
 
-      for (cnt = 0; cnt < parametr_size; cnt++)
-      {
-        byte_buf = (byte)(parameter_val + cnt);
-        USB_Paket_Constructor(ref i_byte, ref CRC_val, byte_buf);
-      }
+      //for (cnt = 0; cnt < parametr_size; cnt++)
+      //{
+      //  byte_buf = (byte)(parameter_val + cnt);
+      //  USB_Paket_Constructor(ref i_byte, ref CRC_val, byte_buf);
+      //}
 
-      USB_Paket_Constructor(ref i_byte, ref CRC_val, CRC_val); //CRC
+      //USB_Paket_Constructor(ref i_byte, ref CRC_val, CRC_val); //CRC
 
-      Parametr.usb_tx_cmd_packet[i_byte++] = Parametr.USB_BYTE_STOP;
-
+      //Parametr.usb_tx_cmd_packet[i_byte++] = Parametr.USB_BYTE_STOP;
+      Parametr.usb_tx_cmd_packet[0] = cmd_code;
       if (this.Port.IsOpen)
       {
-        this.Port.Write(Parametr.usb_tx_cmd_packet, 0, i_byte);
+        this.Port.Write(Parametr.usb_tx_cmd_packet, 0, 1);
+        //this.Port.Write(Parametr.usb_tx_cmd_packet, 0, i_byte);
       }
       else
       {
