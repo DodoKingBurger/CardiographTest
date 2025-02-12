@@ -120,8 +120,10 @@
     <Folder Include="Services\Visual\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="MECG20x86.dll" />
     <Resource Include="icon-electrocardiogram.ico" />
     <Resource Include="Images\icon-electrocardiogram.png" />
+    <Content Include="MECG20.h" />
     <Content Include="MECG20x64.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
