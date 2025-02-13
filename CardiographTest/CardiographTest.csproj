@@ -81,7 +81,14 @@
     </Compile>
     <Compile Include="Properties\Parametr.cs" />
     <Compile Include="Services\Controller\Controller.cs" />
-    <Compile Include="Services\Controller\MECG.cs" />
+    <Compile Include="Services\Controller\MECG\MECG.cs" />
+    <Compile Include="Services\Controller\MECG\structs\ECG_HEADER.cs" />
+    <Compile Include="Services\Controller\MECG\structs\ECG_SIGNAL.cs" />
+    <Compile Include="Services\Controller\MECG\structs\enum\CTSCSE_Database.cs" />
+    <Compile Include="Services\Controller\MECG\structs\enum\CTSCSE_Noise.cs" />
+    <Compile Include="Services\Controller\MECG\structs\enum\ECG_Lead.cs" />
+    <Compile Include="Services\Controller\MECG\structs\enum\WAVEFORM_TYPE.cs" />
+    <Compile Include="Services\Controller\MECG\structs\MODEL_INFORMATION.cs" />
     <Compile Include="Services\Window\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
