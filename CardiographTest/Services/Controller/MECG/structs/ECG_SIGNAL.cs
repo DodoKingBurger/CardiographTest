@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace CardiographTest.Services.Controller.MECG.structs
 {
+  /// <summary>
+  /// ЭКГ Сигнал
+  /// </summary>
   [StructLayout(LayoutKind.Sequential)]
   public struct ECG_SIGNAL
   {

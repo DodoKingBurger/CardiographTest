@@ -10,6 +10,7 @@ namespace CardiographTest.Services.Controller.MECG.structs
   /// <summary>
   /// ЭКГ_ ЗАГОЛОВОК
   /// </summary>
+  [StructLayout(LayoutKind.Sequential)]
   public struct ECG_HEADER
   {
     /// <summary>

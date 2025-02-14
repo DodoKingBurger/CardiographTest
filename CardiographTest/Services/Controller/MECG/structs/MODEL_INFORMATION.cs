@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace CardiographTest.Services.Controller.MECG.structs
 {
+  /// <summary>
+  /// Информация о модуле.
+  /// </summary>
   [StructLayout(LayoutKind.Sequential)]
   public struct MODEL_INFORMATION
   {
