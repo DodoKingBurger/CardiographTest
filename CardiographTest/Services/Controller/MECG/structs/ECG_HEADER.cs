@@ -43,6 +43,6 @@ namespace CardiographTest.Services.Controller.MECG.structs
     /// <summary>
     /// Размер Signal[] задается NumberOfSignals is given by NumberOfSignals
     /// </summary>
-    public ECG_SIGNAL Signal;
+    public ECG_SIGNAL[] Signal;
   }
 }

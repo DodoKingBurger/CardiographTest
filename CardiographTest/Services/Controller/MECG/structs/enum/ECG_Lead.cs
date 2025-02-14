@@ -9,7 +9,7 @@ namespace CardiographTest.Services.Controller.MECG.structs
   /// <summary>
   /// Отведения ЭКГ.
   /// </summary>
-  internal enum ECG_Lead
+  public enum ECG_Lead
   {
     ECG_Lead_I = 0,
     ECG_Lead_II = 1,

@@ -9,7 +9,7 @@ namespace CardiographTest.Services.Controller.MECG.structs
   /// <summary>
   /// Фильтр шумов
   /// </summary>
-  internal enum CTSCSE_Noise
+  public enum CTSCSE_Noise
   {
     /// <summary>
     /// 50Hz noise 25uV peak
