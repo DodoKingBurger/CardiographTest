@@ -10,7 +10,7 @@ namespace CardiographTest.Services.Controller.MECG.structs
   /// <summary>
   /// Информация о модуле.
   /// </summary>
-  [StructLayout(LayoutKind.Sequential)]
+  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
   public struct MODEL_INFORMATION
   {
     /// <summary>

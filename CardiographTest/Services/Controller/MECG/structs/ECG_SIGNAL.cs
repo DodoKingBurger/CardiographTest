@@ -10,7 +10,7 @@ namespace CardiographTest.Services.Controller.MECG.structs
   /// <summary>
   /// ЭКГ Сигнал
   /// </summary>
-  [StructLayout(LayoutKind.Sequential)]
+  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
   public struct ECG_SIGNAL
   {
     /// <summary>

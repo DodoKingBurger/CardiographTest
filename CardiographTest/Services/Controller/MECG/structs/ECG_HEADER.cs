@@ -10,13 +10,13 @@ namespace CardiographTest.Services.Controller.MECG.structs
   /// <summary>
   /// ЭКГ_ ЗАГОЛОВОК
   /// </summary>
-  [StructLayout(LayoutKind.Sequential)]
+  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
   public struct ECG_HEADER
   {
     /// <summary>
     /// Имя записи формы волны ЭКГ
     /// </summary>
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+    [MarshalAs(UnmanagedType.AnsiBStr, SizeConst = 16)]
     public char[] RecordName;
 
     /// <summary>
