@@ -16,8 +16,8 @@ namespace CardiographTest.Services.Controller.MECG.structs
     /// <summary>
     /// Имя записи формы волны ЭКГ
     /// </summary>
-    [MarshalAs(UnmanagedType.AnsiBStr, SizeConst = 16)]
-    public char[] RecordName;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+    public byte[] RecordName;
 
     /// <summary>
     /// Количество сигналов; размер массива Signal[]
@@ -43,6 +43,7 @@ namespace CardiographTest.Services.Controller.MECG.structs
     /// <summary>
     /// Размер Signal[] задается NumberOfSignals is given by NumberOfSignals
     /// </summary>
-    public ECG_SIGNAL[] Signal;
+    
+    public IntPtr Signal;
   }
 }

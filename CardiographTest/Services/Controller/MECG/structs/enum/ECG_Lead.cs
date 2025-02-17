@@ -9,7 +9,7 @@ namespace CardiographTest.Services.Controller.MECG.structs
   /// <summary>
   /// Отведения ЭКГ.
   /// </summary>
-  public enum ECG_Lead
+  public enum ECG_Lead : int // Явно указываем, что enum имеет тип int
   {
     ECG_Lead_I = 0,
     ECG_Lead_II = 1,

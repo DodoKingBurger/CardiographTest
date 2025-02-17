@@ -22,12 +22,17 @@ namespace CardiographTest.Controller
   {
     #region Поля и свойства 
 
+    ///// <summary>
+    ///// Путь к файлу с нативной библеотекой.
+    ///// </summary>
+    //private const string DllFilePath;
+
     /// <summary>
     /// Статус подключения.
     /// </summary>
     public bool ConnectionStatus { get; set; } = false;
 
-    private ECG_HEADER header;
+    private ECG_HEADER header = new ECG_HEADER();
 
     /// <summary>
     /// ЭКГ заголовок.
@@ -101,19 +106,35 @@ namespace CardiographTest.Controller
     /// <summary>
     /// Подключение к MECG.
     /// </summary>
-    public string Connected(int portNumber)
+    public string Connected()
     {
-      if (MECGConnect(portNumber, 5000))
+      if (MECGConnect(-1, 5000))
       {
-        return $"device is connected ... ";
-        //{ MECGGetSerialNumber()}
+        return $"device is connected ... {MECGGetSerialNumber()}";
+        //
       }
       else
       {
         MECGFree();
         throw new IOException("'Error: device is not connected'");
       }
+    }
 
+    /// <summary>
+    /// Подключение к MECG.
+    /// </summary>
+    public string Connected(int portNumber)
+    {
+      if (MECGConnect(portNumber, 5000))
+      {
+        return $"device is connected ... {MECGGetSerialNumber()}";
+        //
+      }
+      else
+      {
+        MECGFree();
+        throw new IOException("'Error: device is not connected'");
+      }
     }
 
     /// <summary>
@@ -134,10 +155,15 @@ namespace CardiographTest.Controller
     /// <param name="file_path">Путь к файлу</param>
     /// <returns>Заголовок ЭКГ.</returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public ECG_HEADER Load_mit_header(string file_path)
+    public void Load_mit_header(string file_path)
     {
-      this.Header = MECGLoadMITHeader(file_path);
-      return this.Header;
+      if (File.Exists(file_path))
+      {
+        var header = MECGLoadMITHeader(file_path);
+        this.Header = Marshal.PtrToStructure<ECG_HEADER>(header);//
+      }
+      else
+        throw new FileNotFoundException("File not found");
     }
 
     /// <summary>
@@ -149,7 +175,8 @@ namespace CardiographTest.Controller
       var signal = this.Header.Signal;
       for(int i = 0; i < this.Header.NumberOfSignals; i++)
       {
-        yield return $"[{i}] , {string.Join(" ", signal[i].Description)}";
+        yield return $"[{i}] , ";
+        //{ string.Join(" ", signal[i].Description)}
       }
     }
 
@@ -162,8 +189,8 @@ namespace CardiographTest.Controller
     /// <exception cref="Exception">"Ошибка загрузки заголовочного файла."</exception>
     public void Load_mit_database(string filePath)
     {
-      if (!MECGLoadMITDatabase(MECGLoadMITHeader(filePath)))
-        throw new Exception("Ошибка загрузки заголовочного файла.");
+      //if (!MECGLoadMITDatabase(Marshal.PtrToStructure<ECG_HEADER>(MECGLoadMITHeader(filePath))))
+      //  throw new Exception("Ошибка загрузки заголовочного файла.");
     }
 
     /// <summary>
@@ -218,7 +245,7 @@ namespace CardiographTest.Controller
     /// Вызывается при подключении или отключении устройства
     /// </summary>
     /// <param name="connected">true, если подключено; в противном случае false</param>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("MECG20x64.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void ConnectedCallback(bool connected);
 
     /// <summary>
@@ -289,8 +316,8 @@ namespace CardiographTest.Controller
     /// Get device serial number
     /// </summary>
     /// <returns>текст серийного номера; НЕ освобождайте возвращаемую строку.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    private static extern string MECGGetSerialNumber();
+    [DllImport("MECG20x86.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
+    private static extern byte MECGGetSerialNumber();
 
     /// <summary>
     /// Получить информацию о режиме устройства
@@ -317,8 +344,7 @@ namespace CardiographTest.Controller
     /// <param name="filePath">Путь к файлу *.hea. Строка с нулевым символом в конце.</param>
     /// <returns>Указатель ::ECG_HEADER, если метод был успешным. NULL в противном случае.</returns>
     [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    [return: MarshalAs(UnmanagedType.Struct)]
-    private static extern ECG_HEADER MECGLoadMITHeader(string filePath);
+    private static extern IntPtr MECGLoadMITHeader(string filePath);
 
 
     /// \brief Загрузить базу данных Physionet 
@@ -328,7 +354,7 @@ namespace CardiographTest.Controller
     /// </summary>
     /// <param name="header">заголовок A ::ECG_HEADER указатель, который возвращается из ::MECGLoadMITHeader ()</param>
     /// <returns>True, если метод был успешным, False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
     private static extern bool MECGLoadMITDatabase(ECG_HEADER header);
 
     /// <summary>
@@ -502,7 +528,7 @@ namespace CardiographTest.Controller
 
     #region Конструкторы
 
-    public MECG()
+    static MECG()
     {
 
     }

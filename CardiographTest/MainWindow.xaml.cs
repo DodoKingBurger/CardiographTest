@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 using CardiographTest.Controller;
 using CardiographTest.Services.Controller.MECG.structs;
 
@@ -42,9 +43,9 @@ namespace CardiographTest
       try
       {
         MECG20 = new MECG();
-        if (MessageBox.Show("Информация", MECG20.Connected(5), MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+        if (MessageBox.Show(MECG20.Connected(5), "Информация", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
         {
-          MECG20.Load_mit_header(Environment.CurrentDirectory + "\\100.hea");
+          MECG20.Load_mit_header(Environment.CurrentDirectory + "\\TestFile\\100.hea"); //
           if (Show_Header(MECG20.Header))
           {
             MECG20.Load_mit_database();
@@ -54,6 +55,8 @@ namespace CardiographTest
             MECG20.Free_ecg_header(MECG20.Header);
             MECG20.Disconnected();
           }
+          else
+            MessageBox.Show("заголовок пуст");
         }
       }
       catch(Exception ex)
@@ -64,23 +67,41 @@ namespace CardiographTest
      
     private bool Show_Header(ECG_HEADER header)
     {
-      List<string> strings = new List<string>
+      if (true)//header.Signal != IntPtr.Zero
       {
-        string.Join("",header.RecordName),
-        $"{header.NumberOfSignals}",
-        $"{header.SamplingFrequency}",
-        $"{header.NumberOfSamplesPerSignal}",
-        $"{header.NumberOfSamplesPerSignal}",
-        Encoding.UTF8.GetString(header.Reserved),
-        string.Join(", ", header.Signal.Select(m => m.Description.ToString())),
-        string.Join(", ", header.Signal.Select(m => m.MappingLead.ToString()))
-      };
-      string Message = string.Empty; 
-      foreach(var str in strings)
-      {
-        Message += str + "\n";
+        //ECG_SIGNAL[] signals = new ECG_SIGNAL[header.NumberOfSignals];
+
+        //for (int i = 0; i < header.NumberOfSignals; i++)
+        //{
+        //  IntPtr signalPtr = IntPtr.Add(header.Signal, i * Marshal.SizeOf<ECG_SIGNAL>());
+        //  signals[i] = Marshal.PtrToStructure<ECG_SIGNAL>(signalPtr);
+        //}
+        //ECG_SIGNAL signals = new ECG_SIGNAL();
+        //signals = Marshal.PtrToStructure<ECG_SIGNAL>(header.Signal);
+
+        string Message = Encoding.ASCII.GetString(header.RecordName).Trim('\0');
+        List<string> strings = new List<string>
+        {
+          Encoding.ASCII.GetString(header.RecordName).Trim('\0'),
+          $"{header.NumberOfSignals}",
+          $"{header.SamplingFrequency}",
+          $"{header.NumberOfSamplesPerSignal}",
+          Encoding.ASCII.GetString(header.Reserved),
+          Encoding.ASCII.GetString(header.Reserved),
+          //signals.Description.ToString(),
+          //signals.MappingLead.ToString()
+          //string.Join(", ", signals.Select(m => m.Description.ToString())),
+          //string.Join(", ", signals.Select(m => m.MappingLead.ToString()))
+        };
+
+        foreach (var str in strings)
+        {
+          Message += str + "\n";
+        }
+        return MessageBox.Show("Информация", Message, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
       }
-      return MessageBox.Show("Информация", Message, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+      else
+        return false;
     }
     #endregion
 

@@ -17,13 +17,14 @@ namespace CardiographTest.Services.Controller.MECG.structs
     /// Signal description
     ///  Описание сигнала
     /// </summary>
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
-    public char[] Description;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+    public byte[] Description;
 
     /// <summary>
     ///  По умолчанию отведение для сопоставления будет настроено соответствующим образом.
     ///  By default, the mapping lead will be configured appropriately.
     /// </summary>
+    [MarshalAs(UnmanagedType.I4)]
     public ECG_Lead MappingLead;               
   }
 }
