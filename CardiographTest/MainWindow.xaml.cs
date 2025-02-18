@@ -46,17 +46,17 @@ namespace CardiographTest
         if (MessageBox.Show(MECG20.Connected(5), "Информация", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
         {
           MECG20.Load_mit_header(Environment.CurrentDirectory + "\\TestFile\\100.hea"); //
-          if (Show_Header(MECG20.Header))
-          {
-            MECG20.Load_mit_database();
-            MECG20.Output_waveform(0);
-            Task.Delay(10);
-            MECG20.Stop_output();
-            MECG20.Free_ecg_header(MECG20.Header);
-            MECG20.Disconnected();
-          }
-          else
-            MessageBox.Show("заголовок пуст");
+          if (Show_Header(MECG20.Header)) ;
+          //{
+          //  //MECG20.Load_mit_database();
+          //  //MECG20.Output_waveform(0);
+          //  //Task.Delay(10);
+          //  //MECG20.Stop_output();
+          //  //MECG20.Free_ecg_header(MECG20.Header);
+          //  //MECG20.Disconnected();
+          //}
+          //else
+          //  MessageBox.Show("заголовок пуст");
         }
       }
       catch(Exception ex)
@@ -80,7 +80,7 @@ namespace CardiographTest
         //ECG_SIGNAL signals = new ECG_SIGNAL();
         //signals = Marshal.PtrToStructure<ECG_SIGNAL>(header.Signal);
 
-        Message = Encoding.ASCII.GetString(header.RecordName).Trim('\0');
+        //Message = Encoding.ASCII.GetString(header.RecordName).Trim('\0');
         //Message +="/" + Encoding.ASCII.GetString(header.Reserved).Trim('\0');
         //List<string> strings = new List<string>
         //{
@@ -98,9 +98,9 @@ namespace CardiographTest
         ECG_SIGNAL[] signals = header.GetSignalArray();
         for (int i = 0; i < header.NumberOfSignals; i++)
         {
-          Message += $"[{i}] - {signals[i].MappingLead} {signals[i].Description} ";
+          Message += $"[{i}] - {signals[i].MappingLead} {Encoding.ASCII.GetString(signals[i].Description).Trim('\0')}" + Environment.NewLine;
         }
-        return MessageBox.Show("Информация", Message, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+        return MessageBox.Show(Message, "Информация" , MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
       }
     }
     #endregion

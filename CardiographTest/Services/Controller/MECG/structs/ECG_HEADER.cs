@@ -40,10 +40,30 @@ namespace CardiographTest.Services.Controller.MECG.structs
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
     public byte[] Reserved;
 
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
+    private ECG_SIGNAL[] signal;
     /// <summary>
     /// Размер Signal[] задается NumberOfSignals is given by NumberOfSignals
     /// </summary>
-    public IntPtr Signal;
+    public ECG_SIGNAL[] Signal 
+    {
+      get 
+      {
+        if (!signal.Equals(null))
+          return signal;
+        else
+          throw new ArgumentNullException("ECG_SIGNAL if null ref");
+      } 
+      set 
+      {
+        if (!value.Equals(null))
+          signal = value;
+        else
+          throw new ArgumentNullException("ECG_SIGNAL if null ref");
+      } 
+    }
+
+
 
     /// <summary>
     /// Метод для получения массива сигналов
@@ -51,20 +71,16 @@ namespace CardiographTest.Services.Controller.MECG.structs
     /// <returns>массива сигналов</returns>
     public ECG_SIGNAL[] GetSignalArray()
     {
-      if (this.Signal == IntPtr.Zero || this.NumberOfSignals <= 0)
-        return null;
+      if (this.Signal == null || this.NumberOfSignals <= 0)
+        throw new ArgumentNullException("ECG_SIGNAL if null ref");
 
       // Создаем массив сигналов
       ECG_SIGNAL[] signalArray = new ECG_SIGNAL[this.NumberOfSignals];
 
-      // Размер структуры ECG_SIGNAL
-      int signalSize = Marshal.SizeOf(typeof(ECG_SIGNAL));
-
       // Копируем данные из неуправляемой памяти в управляемый массив
       for (long i = 0; i < this.NumberOfSignals; i++)
       {
-        IntPtr signalPtr = IntPtr.Add(this.Signal, (int)(i * signalSize));
-        signalArray[i] = Marshal.PtrToStructure<ECG_SIGNAL>(signalPtr);
+        signalArray[i] = Signal[i];
       }
 
       return signalArray;
