@@ -69,6 +69,7 @@ namespace CardiographTest
     {
       if (true)//header.Signal != IntPtr.Zero
       {
+        string Message = string.Empty;
         //ECG_SIGNAL[] signals = new ECG_SIGNAL[header.NumberOfSignals];
 
         //for (int i = 0; i < header.NumberOfSignals; i++)
@@ -79,29 +80,28 @@ namespace CardiographTest
         //ECG_SIGNAL signals = new ECG_SIGNAL();
         //signals = Marshal.PtrToStructure<ECG_SIGNAL>(header.Signal);
 
-        string Message = Encoding.ASCII.GetString(header.RecordName).Trim('\0');
-        List<string> strings = new List<string>
+        Message = Encoding.ASCII.GetString(header.RecordName).Trim('\0');
+        //Message +="/" + Encoding.ASCII.GetString(header.Reserved).Trim('\0');
+        //List<string> strings = new List<string>
+        //{
+        //  Encoding.ASCII.GetString(header.RecordName).Trim('\0'),
+        //  $"{header.NumberOfSignals}",
+        //  $"{header.SamplingFrequency}",
+        //  $"{header.NumberOfSamplesPerSignal}",
+        //  Encoding.ASCII.GetString(header.Reserved),
+        //  Encoding.ASCII.GetString(header.Reserved),
+        //  //signals.Description.ToString(),
+        //  //signals.MappingLead.ToString()
+        //  //string.Join(", ", signals.Select(m => m.Description.ToString())),
+        //  //string.Join(", ", signals.Select(m => m.MappingLead.ToString()))
+        //};
+        ECG_SIGNAL[] signals = header.GetSignalArray();
+        for (int i = 0; i < header.NumberOfSignals; i++)
         {
-          Encoding.ASCII.GetString(header.RecordName).Trim('\0'),
-          $"{header.NumberOfSignals}",
-          $"{header.SamplingFrequency}",
-          $"{header.NumberOfSamplesPerSignal}",
-          Encoding.ASCII.GetString(header.Reserved),
-          Encoding.ASCII.GetString(header.Reserved),
-          //signals.Description.ToString(),
-          //signals.MappingLead.ToString()
-          //string.Join(", ", signals.Select(m => m.Description.ToString())),
-          //string.Join(", ", signals.Select(m => m.MappingLead.ToString()))
-        };
-
-        foreach (var str in strings)
-        {
-          Message += str + "\n";
+          Message += $"[{i}] - {signals[i].MappingLead} {signals[i].Description} ";
         }
         return MessageBox.Show("Информация", Message, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
       }
-      else
-        return false;
     }
     #endregion
 

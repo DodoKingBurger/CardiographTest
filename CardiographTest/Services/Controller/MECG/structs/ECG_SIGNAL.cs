@@ -10,7 +10,7 @@ namespace CardiographTest.Services.Controller.MECG.structs
   /// <summary>
   /// ЭКГ Сигнал
   /// </summary>
-  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
   public struct ECG_SIGNAL
   {
     /// <summary>
@@ -24,7 +24,6 @@ namespace CardiographTest.Services.Controller.MECG.structs
     ///  По умолчанию отведение для сопоставления будет настроено соответствующим образом.
     ///  By default, the mapping lead will be configured appropriately.
     /// </summary>
-    [MarshalAs(UnmanagedType.I4)]
     public ECG_Lead MappingLead;               
   }
 }

@@ -25,7 +25,12 @@ namespace CardiographTest.Controller
     ///// <summary>
     ///// Путь к файлу с нативной библеотекой.
     ///// </summary>
-    //private const string DllFilePath;
+    //private const string DllFilePath = "MECG20x86.dll";
+
+    ///// <summary>
+    ///// Путь к файлу с нативной библеотекой.
+    ///// </summary>
+    private const string DllFilePath = "MECG20x64.dll";
 
     /// <summary>
     /// Статус подключения.
@@ -123,9 +128,33 @@ namespace CardiographTest.Controller
     /// <summary>
     /// Подключение к MECG.
     /// </summary>
+    /// <param name="portNumber">Номер порта.</param>
+    /// <returns>Сериальный номер прибора.</returns>
+    /// <exception cref="IOException">'Error: device is not connected'</exception>
     public string Connected(int portNumber)
     {
       if (MECGConnect(portNumber, 5000))
+      {
+        return $"device is connected ... {MECGGetSerialNumber()}";
+        //
+      }
+      else
+      {
+        MECGFree();
+        throw new IOException("'Error: device is not connected'");
+      }
+    }
+
+    /// <summary>
+    /// Подключение к MECG.
+    /// </summary>
+    /// <param name="portNumber">Номер порта.</param>
+    /// <param name="millisecondsTimeout">Интервал ожидания.</param>
+    /// <returns></returns>
+    /// <exception cref="IOException">'Error: device is not connected'</exception>
+    public string Connected(int portNumber, int millisecondsTimeout)
+    {
+      if (MECGConnect(portNumber, millisecondsTimeout))
       {
         return $"device is connected ... {MECGGetSerialNumber()}";
         //
@@ -164,20 +193,6 @@ namespace CardiographTest.Controller
       }
       else
         throw new FileNotFoundException("File not found");
-    }
-
-    /// <summary>
-    /// Запросить сигнал.
-    /// </summary>
-    /// <returns>Возвращает сигналы по порядку отведений.</returns>
-    public IEnumerable<string> Get_Signal()
-    {
-      var signal = this.Header.Signal;
-      for(int i = 0; i < this.Header.NumberOfSignals; i++)
-      {
-        yield return $"[{i}] , ";
-        //{ string.Join(" ", signal[i].Description)}
-      }
     }
 
     /// <summary>
@@ -255,7 +270,7 @@ namespace CardiographTest.Controller
     /// <param name="time">Current position. Unit: second</param>
     /// <param name="voltage">ECG 12-lead signal voltage. Unit: mV</param>
     /// <param name="end"></param>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void OutputSignalCallback(double time,
       [MarshalAs(UnmanagedType.LPArray, SizeConst = 12)] double[] voltage,
       bool end);
@@ -268,7 +283,7 @@ namespace CardiographTest.Controller
     /// <param name="time">Current position. Unit: second</param>
     /// <param name="voltage">ECG 12-lead signal voltage. Unit: mV</param>
     /// <param name="end"></param>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void OutputSignalCallback(double totalTime,
       double time,
       [MarshalAs(UnmanagedType.LPArray, SizeConst = 12)] double[] voltage,
@@ -279,7 +294,7 @@ namespace CardiographTest.Controller
     /// задержка обнаруживается устройством во время вывода сигналов
     /// </summary>
     /// <param name="time"> time         Unit: ms</param>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void OutputDelayCallback(int time);
 
     #endregion
@@ -293,7 +308,7 @@ namespace CardiographTest.Controller
     /// </summary>
     /// <param name="cb">ConnectedCallback - функция вызывается при подключении или отключении устройства</param>
     /// <returns>True, если метод был успешным. False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGInit(FPtrConnectedCallback cb);
 
     /// <summary>
@@ -302,21 +317,21 @@ namespace CardiographTest.Controller
     /// <param name="portNumber">Номер COM-порта устройства.-1 означает, что номер порта выбирается автоматически</param>
     /// <param name="millisecondsTimeout">Время ожидания подключения; количество миллисекунд для подключения или -1 для ожидания на неопределенный срок.</param>
     /// <returns>true, если устройство подключено; false, если истек интервал ожидания иустройство все еще не подключено.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGConnect(
       int portNumber, int millisecondsTimeout);
 
     /// <summary>
     /// Отключите устройство и очистите библиотечный ресурс.
     /// </summary>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void MECGFree();
 
     /// <summary>
     /// Get device serial number
     /// </summary>
     /// <returns>текст серийного номера; НЕ освобождайте возвращаемую строку.</returns>
-    [DllImport("MECG20x86.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(DllFilePath, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
     private static extern byte MECGGetSerialNumber();
 
     /// <summary>
@@ -324,14 +339,14 @@ namespace CardiographTest.Controller
     /// </summary>
     /// <param name="modelInfo">Указатель на структуру ::MODEL_INFORMATION</param>
     /// <returns>True, если метод был успешным. False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGGetDeviceInformation(MODEL_INFORMATION modelInfo);
 
     /// <summary>
     /// Проверьте, выводит ли устройство MECG данные.
     /// </summary>
     /// <returns>True, если устройство выводит данные. False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGIsOutputting();
 
 
@@ -343,7 +358,7 @@ namespace CardiographTest.Controller
     /// </summary>
     /// <param name="filePath">Путь к файлу *.hea. Строка с нулевым символом в конце.</param>
     /// <returns>Указатель ::ECG_HEADER, если метод был успешным. NULL в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern IntPtr MECGLoadMITHeader(string filePath);
 
 
@@ -354,7 +369,7 @@ namespace CardiographTest.Controller
     /// </summary>
     /// <param name="header">заголовок A ::ECG_HEADER указатель, который возвращается из ::MECGLoadMITHeader ()</param>
     /// <returns>True, если метод был успешным, False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
     private static extern bool MECGLoadMITDatabase(ECG_HEADER header);
 
     /// <summary>
@@ -363,7 +378,7 @@ namespace CardiographTest.Controller
     /// структуры ::ECG_SIGNAL, а затем вызвать эту функцию для обновления.
     /// </summary>
     /// <param name="header">заголовок A ::ECG_HEADER указатель</param>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void MECGUpdateECGHeaderMappingLead(ECG_HEADER header);
 
     /// <summary>
@@ -372,7 +387,7 @@ namespace CardiographTest.Controller
     /// лежит на вызывающем объекте.
     /// </summary>
     /// <param name="header">заголовок A ::ECG_HEADER указатель</param>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void MECGFreeECGHeader(ECG_HEADER header);
 
     /// <summary>
@@ -382,7 +397,7 @@ namespace CardiographTest.Controller
     /// </summary>
     /// <param name="filePath">filePath Путь к файлу *.txt или *.ecg. Строка с нулевым символом в конце.</param>
     /// <returns>Указатель ::ECG_HEADER, если метод был успешным. NULL в противном случае</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern ECG_HEADER MECGLoadDatabaseAHA(string filePath);
 
     /// <summary>
@@ -393,7 +408,7 @@ namespace CardiographTest.Controller
     /// </summary>
     /// <param name="filePath">Путь к файлу *.dcd. Строка с нулевым завершением.</param>
     /// <returns>Указатель ::ECG_HEADER, если метод был успешным. NULL в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern ECG_HEADER MECGLoadDatabaseCSE(string filePath);
 
     /// <summary>
@@ -405,7 +420,7 @@ namespace CardiographTest.Controller
     /// <param name="filePath">Путь к файлу *.txt.</param>
     /// <returns>ECG_HEADER* путем вызова ::MECGFreeECGHeader (). Частота дискретизации, определенная в файле
     ///, должна находиться в диапазоне от 100 (Гц) до 1000 (Гц).</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern ECG_HEADER MECGLoadDatabaseWhaleTeq(string filePath);
 
     /// <summary>
@@ -415,7 +430,7 @@ namespace CardiographTest.Controller
     /// <param name="database">CTSCSE_Database value.</param>
     /// <param name="noise">A ::CTSCSE_Noise value. Если значение равно CTSCSENoise_MAX, шум не применяется.</param>
     /// <returns>ECG_HEADER pointer, если метод был успешным. NULL в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern ECG_HEADER MECGLoadDatabaseCTS_CSE(CTSCSE_Database database, CTSCSE_Noise noise);
 
     /// <summary>
@@ -427,7 +442,7 @@ namespace CardiographTest.Controller
     /// <param name="amplitude">амплитуда Амплитуда напряжение. Единица измерения: мВpp.
     ///</param>
     /// <returns>True, если метод был успешным. False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGLoadWaveform(WAVEFORM_TYPE waveform, double frequency, double amplitude);
 
     /// <summary>
@@ -438,7 +453,7 @@ namespace CardiographTest.Controller
     /// <param name="frequency">частота Частота. Единица: Гц. Разрешение: 0,01 Гц. Диапазон: 0~100 Гц.</param>
     /// <param name="amplitude">амплитуда Амплитуда напряжение. Единица: мВpp. 8 записей расположены в порядке LeadI, LeadII, V1~V6.</param>
     /// <returns>True, если метод был успешным. False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGLoadWaveformEx(WAVEFORM_TYPE waveform, double frequency, [MarshalAs(UnmanagedType.LPArray, SizeConst = 8)] double[] amplitude);
 
     /// <summary>
@@ -449,7 +464,7 @@ namespace CardiographTest.Controller
     /// <param name="frequency">частота Частота. Единица: Гц. Разрешение: 0,01 Гц. Диапазон: 0~100 Гц.</param>
     /// <param name="amplitude">амплитуда Амплитуда напряжение. Единица: мВpp</param>
     /// <returns>True, если метод был успешным. False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGLoadWaveformRectanglePulse(int pulseWidth, double frequency, double amplitude);
 
     /// <summary>
@@ -460,7 +475,7 @@ namespace CardiographTest.Controller
     /// <param name="frequency">частота Частота. Единица измерения: Гц. Разрешение: 0,01 Гц. Диапазон: 0~100 Гц.</param>
     /// <param name="amplitude">амплитуда Амплитуда напряжение. Единица измерения: мВpp</param>
     /// <returns>True, если метод был успешным. False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGLoadWaveformCalibrationMode(double frequency, double amplitude);
 
     /// <summary>
@@ -469,7 +484,7 @@ namespace CardiographTest.Controller
     /// Загруженная форма сигнала фиксируется на 10-секундной длине. Используется в процессе калибровки.
     /// </summary>
     /// <returns>True, если метод был успешным. False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGLoadWaveformAutoCalibrationMode();
 
     /// <summary>
@@ -480,14 +495,14 @@ namespace CardiographTest.Controller
     /// <param name="duration">duration Длительность ожидаемых сигналов. Единица измерения: секунда</param>
     /// <param name="outputSignalCB">outputSignalCB Функция обратного вызова, которая будет вызвана с возвращенными сигналами.</param>
     /// <returns>True, если метод был успешным. False, если outputSignalCB равен NULL или данные формы волны пусты</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGGetWaveformSignal(int start, int duration, FPtrOutputSignalCallback outputSignalCB);
 
     /// <summary>
     /// Включить/выключить режим цикла
     /// </summary>
     /// <param name="enable">True, если ожидается режим цикла. False в противном случае.</param>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void MECGEnableLoop(bool enable);
 
     /// <summary>
@@ -495,7 +510,7 @@ namespace CardiographTest.Controller
     /// Шумовой сигнал эффективен только если форма волны нагрузки — CTS/CSE.
     /// </summary>
     /// <param name="enable">True, если ожидается шум. False в противном случае.</param>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void MECGEnableNoise(bool enable);
 
     /// <summary>
@@ -505,13 +520,13 @@ namespace CardiographTest.Controller
     /// <param name="outputSignalCB">Функция обратного вызова, которая возвращает сигналы ЭКГ по 12 отведениям</param>
     /// <param name="outputDelayCB">Функция обратного вызова, которая возвращает время задержки, если произошла задержка передачи пакета</param>
     /// <returns>True, если метод был успешным. False в противном случае.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool MECGOutputWaveform(int startPosition, FPtrOutputSignalExCallback outputSignalCB = null, FPtrOutputDelayCallback outputDelayCB = null);
 
     /// <summary>
     /// Остановите вывод устройства.
     /// </summary>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern void MECGStopOutput();
 
     /// <summary>
@@ -519,7 +534,7 @@ namespace CardiographTest.Controller
     /// </summary>
     /// <returns>Версия состоит из 4 цифр и сохраняется в каждом байте беззнакового целого значения.
     /// Например, если возвращаемое значение равно 0x01020304, версия dll равна 1.2.3.4.</returns>
-    [DllImport("MECG20x86.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(DllFilePath, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern Int32 MECGGetVersion();
 
     #endregion
